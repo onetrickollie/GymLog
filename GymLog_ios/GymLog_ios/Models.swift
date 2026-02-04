@@ -14,17 +14,20 @@ final class Workout {
     var notes: String
     var category: String
 
-    @Relationship(deleteRule: .cascade)
+    // Starts when first set is added OR when user taps Start
+    var startedAt: Date?
+    // Set when user taps End Workout
+    var endedAt: Date?
+
+    @Relationship(deleteRule: .cascade, inverse: \ExerciseEntry.workout)
     var entries: [ExerciseEntry] = []
 
-    init(
-        date: Date = .now,
-        notes: String = "",
-        category: WorkoutCategory
-    ) {
+    init(date: Date = .now, notes: String = "", category: WorkoutCategory) {
         self.date = date
         self.notes = notes
         self.category = category.rawValue
+        self.startedAt = nil
+        self.endedAt = nil
     }
 }
 
@@ -33,14 +36,15 @@ final class Workout {
 final class ExerciseEntry {
     var name: String
     var category: String
+    var workout: Workout?
 
-    // Relationship: one entry has many sets
     @Relationship(deleteRule: .cascade)
     var sets: [WorkoutSet] = []
 
-    init(name: String,category: WorkoutCategory) {
+    init(name: String, category: WorkoutCategory, workout: Workout? = nil) {
         self.name = name
         self.category = category.rawValue
+        self.workout = workout
     }
 }
 

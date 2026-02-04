@@ -4,7 +4,6 @@
 //
 //  Created by KaixiangLiu on 2/3/26.
 //
-
 import SwiftUI
 import SwiftData
 
@@ -12,57 +11,65 @@ struct AddExerciseView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var workout: Workout
 
-    @State private var selectedCategory: WorkoutCategory = .push
     @State private var selectedExercise: String = ""
     @State private var customExerciseName: String = ""
 
-    private var exercisesForCategory: [String] {
-        ExerciseCatalog.exercises[selectedCategory] ?? []
+    private var workoutCategory: WorkoutCategory {
+        WorkoutCategory(rawValue: workout.category) ?? .push
+    }
+
+    private var exercisesForDay: [String] {
+        ExerciseCatalog.exercises[workoutCategory] ?? ["Other"]
+    }
+
+    private var finalExerciseName: String {
+        if selectedExercise == "Other" {
+            return customExerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
+        } else {
+            return selectedExercise
+        }
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Category", selection: $selectedCategory) {
-                    ForEach(WorkoutCategory.allCases) { category in
-                        Text(category.rawValue).tag(category)
-                    }
+                // Optional: show the day type as read-only context
+                Section("Today") {
+                    Text(workoutCategory.rawValue)
+                        .foregroundStyle(.secondary)
                 }
 
-                Picker("Exercise", selection: $selectedExercise) {
-                    ForEach(exercisesForCategory, id: \.self) {
-                        Text($0)
+                Section("Exercise") {
+                    Picker("Exercise", selection: $selectedExercise) {
+                        ForEach(exercisesForDay, id: \.self) { name in
+                            Text(name).tag(name)
+                        }
                     }
-                }
 
-                if selectedExercise == "Other" {
-                    TextField("Custom exercise name", text: $customExerciseName)
-                        .textInputAutocapitalization(.words)
+                    if selectedExercise == "Other" {
+                        TextField("Custom exercise name", text: $customExerciseName)
+                            .textInputAutocapitalization(.words)
+                    }
                 }
             }
             .navigationTitle("Add Exercise")
             .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        let finalName =
-                            selectedExercise == "Other"
-                            ? customExerciseName.trimmingCharacters(in: .whitespacesAndNewlines)
-                            : selectedExercise
+                        guard !finalExerciseName.isEmpty else { return }
 
-                        guard !finalName.isEmpty else { return }
-
-                        let entry = ExerciseEntry(
-                            name: finalName,
-                            category: WorkoutCategory(rawValue: workout.category) ?? .push
-                        )
+                        let entry = ExerciseEntry(name: finalExerciseName, category: workoutCategory, workout: workout)
                         workout.entries.append(entry)
                         dismiss()
                     }
-                    .disabled(selectedExercise.isEmpty)
+                    .disabled(selectedExercise.isEmpty || (selectedExercise == "Other" && finalExerciseName.isEmpty))
                 }
             }
             .onAppear {
-                selectedExercise = exercisesForCategory.first ?? ""
+                selectedExercise = exercisesForDay.first ?? "Other"
             }
         }
     }

@@ -53,6 +53,12 @@ struct ExerciseDetailView: View {
         entry.sets.append(WorkoutSet(weight: w, reps: r))
         weightText = ""
         repsText = ""
+        
+        if entry.workout?.startedAt == nil {
+            entry.workout?.startedAt = Date()
+            entry.workout?.endedAt = nil
+        }
+
     }
 
     private func deleteSets(at offsets: IndexSet) {

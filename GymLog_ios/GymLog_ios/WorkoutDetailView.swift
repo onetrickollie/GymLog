@@ -11,11 +11,48 @@ import SwiftData
 struct WorkoutDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var workout: Workout
-
+    @State private var now = Date()
+    private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     @State private var showingAddExercise = false
 
     var body: some View {
         List {
+            Section("Session") {
+                HStack {
+                    Text("Elapsed")
+                    Spacer()
+                    Text(formatHMS(elapsedSeconds))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack(spacing: 12) {
+                    Button(workout.startedAt == nil ? "Start Workout" : "Restart") {
+                        workout.startedAt = Date()
+                        workout.endedAt = nil
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("End Workout") {
+                        if workout.startedAt == nil {
+                            workout.startedAt = Date()
+                        }
+                        workout.endedAt = Date()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(workout.startedAt == nil || workout.endedAt != nil)
+                }
+
+                if workout.endedAt != nil {
+                    Text("Workout ended.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Timer starts automatically when you log your first set.")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .onReceive(ticker) { now = $0 }
+
             Section("Notes") {
                 TextField("Notes", text: $workout.notes, axis: .vertical)
                     .lineLimit(1...4)
@@ -58,5 +95,12 @@ struct WorkoutDetailView: View {
             modelContext.delete(entry)
         }
     }
+    
+    private var elapsedSeconds: Int {
+        guard let started = workout.startedAt else { return 0 }
+        let end = workout.endedAt ?? now
+        return max(0, Int(end.timeIntervalSince(started)))
+    }
+
 
 }
