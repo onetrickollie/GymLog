@@ -12,27 +12,35 @@ import SwiftData
 final class Workout {
     var date: Date
     var notes: String
+    var category: String
 
-    // Relationship: one workout has many entries
     @Relationship(deleteRule: .cascade)
     var entries: [ExerciseEntry] = []
 
-    init(date: Date = .now, notes: String = "") {
+    init(
+        date: Date = .now,
+        notes: String = "",
+        category: WorkoutCategory
+    ) {
         self.date = date
         self.notes = notes
+        self.category = category.rawValue
     }
 }
+
 
 @Model
 final class ExerciseEntry {
     var name: String
+    var category: String
 
     // Relationship: one entry has many sets
     @Relationship(deleteRule: .cascade)
     var sets: [WorkoutSet] = []
 
-    init(name: String) {
+    init(name: String,category: WorkoutCategory) {
         self.name = name
+        self.category = category.rawValue
     }
 }
 

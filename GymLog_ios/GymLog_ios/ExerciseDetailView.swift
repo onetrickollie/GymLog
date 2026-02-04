@@ -57,7 +57,9 @@ struct ExerciseDetailView: View {
 
     private func deleteSets(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(entry.sets[index])
+            let set = entry.sets[index]
+            entry.sets.remove(at: index)
+            modelContext.delete(set)
         }
     }
 }

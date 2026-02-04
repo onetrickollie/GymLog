@@ -16,6 +16,33 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
+            Section("Best Lifts") {
+                ForEach(uniqueExerciseNames(), id: \.self) { name in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(name)
+                            .font(.headline)
+
+                        if let weekly = ExerciseStats.bestSetThisWeek(
+                            workouts: workouts,
+                            exerciseName: name
+                        ) {
+                            Text("Best This Week: \(weekly.weight, specifier: "%.0f") lbs × \(weekly.reps)")
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if let pr = ExerciseStats.personalBest(
+                            workouts: workouts,
+                            exerciseName: name
+                        ) {
+                            Text("Personal Best: \(pr.weight, specifier: "%.0f") lbs")
+                                .font(.caption)
+                                .foregroundStyle(.green)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+
             List {
                 if workouts.isEmpty {
                     ContentUnavailableView(
@@ -67,4 +94,8 @@ struct ContentView: View {
             modelContext.delete(workouts[index])
         }
     }
+    private func uniqueExerciseNames() -> [String] {
+        Set(workouts.flatMap { $0.entries.map { $0.name } }).sorted()
+    }
+
 }

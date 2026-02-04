@@ -53,7 +53,10 @@ struct WorkoutDetailView: View {
 
     private func deleteEntries(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(workout.entries[index])
+            let entry = workout.entries[index]
+            workout.entries.remove(at: index)
+            modelContext.delete(entry)
         }
     }
+
 }

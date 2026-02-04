@@ -1,10 +1,3 @@
-//
-//  AddWorkoutView.swift
-//  GymLog_ios
-//
-//  Created by KaixiangLiu on 2/3/26.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -14,22 +7,30 @@ struct AddWorkoutView: View {
 
     @State private var date: Date = .now
     @State private var notes: String = ""
+    @State private var selectedCategory: WorkoutCategory = .push
 
     var body: some View {
         NavigationStack {
             Form {
                 DatePicker("Date", selection: $date, displayedComponents: .date)
+
+                Picker("Workout Type", selection: $selectedCategory) {
+                    ForEach(WorkoutCategory.allCases) { category in
+                        Text(category.rawValue).tag(category)
+                    }
+                }
+
                 TextField("Notes (optional)", text: $notes, axis: .vertical)
-                    .lineLimit(1...3)
             }
             .navigationTitle("New Workout")
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        let workout = Workout(date: date, notes: notes)
+                        let workout = Workout(
+                            date: date,
+                            notes: notes,
+                            category: selectedCategory
+                        )
                         modelContext.insert(workout)
                         dismiss()
                     }
