@@ -87,6 +87,13 @@ struct ContentView: View {
                                                 .foregroundStyle(.secondary)
                                                 .lineLimit(1)
                                         }
+                                        
+                                        if let duration = sessionDurationText(for: workout) {
+                                            Text("Session: \(duration)")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+
 
                                         Text("\(workout.entries.count) exercise(s)")
                                             .font(.caption)
@@ -117,7 +124,7 @@ struct ContentView: View {
             }
 
             // -----------------------------
-            // REST TIMER TAB (SEPARATE UI)
+            // REST TIMER TAB
             // -----------------------------
             RestTimerView()
                 .tabItem {
@@ -135,4 +142,14 @@ struct ContentView: View {
     private func uniqueExerciseNames() -> [String] {
         Set(workouts.flatMap { $0.entries.map { $0.name } }).sorted()
     }
+    
+    private func sessionDurationText(for workout: Workout) -> String? {
+        guard let started = workout.startedAt else { return nil }
+        let end = workout.endedAt ?? Date()
+        let secs = max(0, Int(end.timeIntervalSince(started)))
+        return formatHMS(secs)
+    }
+
+
+
 }
