@@ -10,7 +10,6 @@
 //
 //  Created by KaixiangLiu on 2/3/26.
 //
-
 import SwiftUI
 import SwiftData
 
@@ -23,42 +22,10 @@ struct ContentView: View {
     var body: some View {
         TabView {
             // -----------------------------
-            // LOG TAB
+            // LOG TAB (only day logs)
             // -----------------------------
             NavigationStack {
                 List {
-                    Section("Best Lifts") {
-                        if uniqueExerciseNames().isEmpty {
-                            Text("Log some sets to see weekly bests and PRs.")
-                                .foregroundStyle(.secondary)
-                        } else {
-                            ForEach(uniqueExerciseNames(), id: \.self) { name in
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(name)
-                                        .font(.headline)
-
-                                    if let weekly = ExerciseStats.bestSetThisWeek(
-                                        workouts: workouts,
-                                        exerciseName: name
-                                    ) {
-                                        Text("Best This Week: \(weekly.weight, specifier: "%.0f") lbs × \(weekly.reps)")
-                                            .foregroundStyle(.secondary)
-                                    }
-
-                                    if let pr = ExerciseStats.personalBest(
-                                        workouts: workouts,
-                                        exerciseName: name
-                                    ) {
-                                        Text("Personal Best: \(pr.weight, specifier: "%.0f") lbs")
-                                            .font(.caption)
-                                            .foregroundStyle(.green)
-                                    }
-                                }
-                                .padding(.vertical, 4)
-                            }
-                        }
-                    }
-
                     Section("Workouts") {
                         if workouts.isEmpty {
                             ContentUnavailableView(
@@ -87,13 +54,12 @@ struct ContentView: View {
                                                 .foregroundStyle(.secondary)
                                                 .lineLimit(1)
                                         }
-                                        
+
                                         if let duration = sessionDurationText(for: workout) {
                                             Text("Session: \(duration)")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
                                         }
-
 
                                         Text("\(workout.entries.count) exercise(s)")
                                             .font(.caption)
@@ -119,17 +85,25 @@ struct ContentView: View {
                     AddWorkoutView()
                 }
             }
-            .tabItem {
-                Label("Log", systemImage: "list.bullet")
-            }
+            .tabItem { Label("Log", systemImage: "list.bullet") }
+
+            // -----------------------------
+            // BEST LIFTS TAB (PB page)
+            // -----------------------------
+            BestLiftsView(workouts: workouts)
+                .tabItem { Label("Best", systemImage: "trophy") }
+
+            // -----------------------------
+            // CHARTS TAB
+            // -----------------------------
+            ProgressView(workouts: workouts)
+                .tabItem { Label("Charts", systemImage: "chart.line.uptrend.xyaxis") }
 
             // -----------------------------
             // REST TIMER TAB
             // -----------------------------
             RestTimerView()
-                .tabItem {
-                    Label("Rest", systemImage: "timer")
-                }
+                .tabItem { Label("Rest", systemImage: "timer") }
         }
     }
 
@@ -139,17 +113,11 @@ struct ContentView: View {
         }
     }
 
-    private func uniqueExerciseNames() -> [String] {
-        Set(workouts.flatMap { $0.entries.map { $0.name } }).sorted()
-    }
-    
+    // Live duration (updates when you open the list; not continuously ticking)
     private func sessionDurationText(for workout: Workout) -> String? {
         guard let started = workout.startedAt else { return nil }
         let end = workout.endedAt ?? Date()
         let secs = max(0, Int(end.timeIntervalSince(started)))
         return formatHMS(secs)
     }
-
-
-
 }
