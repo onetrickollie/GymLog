@@ -20,9 +20,37 @@ enum WorkoutCategory: String, CaseIterable, Identifiable {
 
 struct ExerciseCatalog {
     static let exercises: [WorkoutCategory: [String]] = [
-        .push: ["Bench Press", "Overhead Press", "Incline Bench", "Other"],
-        .pull: ["Lat Pulldown", "Pull-Up", "Seated Row", "Other"],
-        .legs: ["Squat", "Leg Press", "Romanian Deadlift", "Other"],
+        .push: [
+          "Barbell Bench Press",
+          "Overhead Shoulder Press",
+          "Incline Dumbbell Press",
+          "Chest Fly",
+          "Lateral Raises",
+          "Dips",
+          "Triceps Pushdown",
+          "Skull Crushers",
+          "Overhead Triceps Extension"
+        ],
+        .pull: [
+          "Pull-Ups / Assisted Pull-Ups",
+          "Lat Pulldown",
+          "Barbell Row",
+          "Seated Cable Row",
+          "Face Pulls",
+          "Rear Delt Fly",
+          "Barbell Curl",
+          "Hammer Curl"
+        ],
+        .legs: [
+          "Back Squat",
+          "Leg Press",
+          "Romanian Deadlift",
+          "Walking Lunges",
+          "Leg Curl",
+          "Leg Extension",
+          "Standing Calf Raises",
+          "Seated Calf Raises"
+        ],
         .chest: ["Bench Press", "Dumbbell Fly", "Other"],
         .back: ["Deadlift", "Lat Pulldown", "Other"],
         .arms: ["Bicep Curl", "Tricep Pushdown", "Other"]
